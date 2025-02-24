@@ -33,21 +33,19 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Items will be dynamically inserted here -->
+      <!-- Items will be inserted here -->
     </tbody>
   </table>
 
   <script>
-    // Fetch and render items from the API
+    // Fetch and render items from the Warframe Market API via AllOrigins proxy
     function fetchItems() {
-      // Using a proxy to bypass CORS restrictions.
-      // For public use on GitHub Pages, you may need to request temporary access at:
-      // https://cors-anywhere.herokuapp.com/corsdemo
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
       const apiUrl = 'https://api.warframe.market/v1/items';
-      const fetchUrl = proxyUrl + apiUrl;
+      // AllOrigins requires the URL to be encoded
+      const encodedUrl = encodeURIComponent(apiUrl);
+      const proxyUrl = `https://api.allorigins.hexocode.repl.co/get?disableCache=true&url=${encodedUrl}`;
 
-      fetch(fetchUrl)
+      fetch(proxyUrl)
         .then(response => {
           if (!response.ok) {
             throw new Error("Network response was not ok: " + response.statusText);
@@ -55,8 +53,12 @@
           return response.json();
         })
         .then(data => {
-          // Assuming the API returns an object with data.payload.items array
-          const items = data.payload.items;
+          // AllOrigins returns the result in "contents" as a string.
+          const contents = data.contents;
+          // Parse the returned JSON string into an object.
+          const parsedData = JSON.parse(contents);
+          // Assuming the API returns an object with a payload containing an items array.
+          const items = parsedData.payload.items;
           renderItems(items);
         })
         .catch(error => {
@@ -64,27 +66,27 @@
         });
     }
 
-    // Render items in the table with a placeholder for calculated fields
+    // Render items in the table
     function renderItems(items) {
       const tableBody = document.getElementById("itemsTable").querySelector("tbody");
-      tableBody.innerHTML = ""; // Clear existing rows
+      tableBody.innerHTML = ""; // Clear any existing rows
 
       items.forEach(item => {
         const row = document.createElement("tr");
 
-        // url_name column
+        // Create cell for url_name
         const urlNameCell = document.createElement("td");
         urlNameCell.textContent = item.url_name;
         row.appendChild(urlNameCell);
 
-        // item_name column
+        // Create cell for item_name
         const itemNameCell = document.createElement("td");
         itemNameCell.textContent = item.item_name;
         row.appendChild(itemNameCell);
 
-        // Placeholder for a calculated field
+        // Placeholder cell for a future calculated field
         const calcFieldCell = document.createElement("td");
-        calcFieldCell.textContent = "TBD"; // Replace with your calculation later
+        calcFieldCell.textContent = "TBD";  // Replace with your calculated value later
         row.appendChild(calcFieldCell);
 
         tableBody.appendChild(row);
