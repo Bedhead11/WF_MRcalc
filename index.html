@@ -2,99 +2,313 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Warframe Market Items</title>
+  <title>Warframe Market Orders Viewer</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f9f9f9;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
+    h1 {
+      text-align: center;
     }
-    th, td {
-      padding: 10px;
+    .item-result {
+      background: #fff;
       border: 1px solid #ddd;
-      text-align: left;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
     }
-    th {
-      background-color: #f4f4f4;
+    pre {
+      background: #eee;
+      padding: 10px;
+      overflow-x: auto;
+    }
+    .error {
+      color: red;
     }
   </style>
 </head>
 <body>
-  <h1>Warframe Market Items</h1>
-  <table id="itemsTable">
-    <thead>
-      <tr>
-        <th>url_name</th>
-        <th>item_name</th>
-        <th>Calculated Field</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Items will be inserted here -->
-    </tbody>
-  </table>
+  <h1>Warframe Market Orders Viewer</h1>
+  <div id="content">
+    <p>Loading orders data…</p>
+  </div>
 
   <script>
-    // Fetch and render items from the Warframe Market API via AllOrigins proxy
-    function fetchItems() {
-      const apiUrl = 'https://api.warframe.market/v1/items';
-      // AllOrigins requires the URL to be encoded
-      const encodedUrl = encodeURIComponent(apiUrl);
-      const proxyUrl = `https://api.allorigins.hexocode.repl.co/get?disableCache=true&url=${encodedUrl}`;
+    // List of item URL names
+    const items = [
+      "frost_prime_set",
+      "mantis_set",
+      "hydroid_prime_set",
+      "wolf_sledge_set",
+      "vasto_prime_set",
+      "zhuge_prime_set",
+      "dual_kamas_prime_set",
+      "snipetron_vandal_set",
+      "destreza_prime_set",
+      "saryn_prime_set",
+      "stradavar_prime_set",
+      "helios_prime_set",
+      "silva_and_aegis_prime_set",
+      "kavasa_prime_kubrow_collar_set",
+      "latron_prime_set",
+      "lex_prime_set",
+      "odonata_prime_set",
+      "vectis_prime_set",
+      "rhino_prime_set",
+      "sicarus_prime_set",
+      "scimitar_set",
+      "braton_prime_set",
+      "aklex_prime_set",
+      "ninkondi_prime_set",
+      "wukong_prime_set",
+      "ember_prime_set",
+      "fang_prime_set",
+      "mag_prime_set",
+      "euphona_prime_set",
+      "oberon_prime_set",
+      "bo_prime_set",
+      "boar_prime_set",
+      "boltor_prime_set",
+      "strun_wraith_set",
+      "kogake_prime_set",
+      "lato_vandal_set",
+      "braton_vandal_set",
+      "akvasto_prime_set",
+      "furax_wraith_set",
+      "ankyros_prime_set",
+      "paris_prime_set",
+      "trinity_prime_set",
+      "ballistica_prime_set",
+      "venka_prime_set",
+      "akbronco_prime_set",
+      "carrier_prime_set",
+      "dakra_prime_set",
+      "dera_vandal_set",
+      "latron_wraith_set",
+      "twin_vipers_wraith_set",
+      "dethcube_prime_set",
+      "baza_prime_set",
+      "aksomati_prime_set",
+      "hikou_prime_set",
+      "reaper_prime_set",
+      "sybaris_prime_set",
+      "shedu_set",
+      "redeemer_prime_set",
+      "orthos_prime_set",
+      "volt_prime_set",
+      "amesha_set",
+      "elytron_set",
+      "itzal_set",
+      "tigris_prime_set",
+      "karak_wraith_set",
+      "fragor_prime_set",
+      "pangolin_prime_set",
+      "titania_prime_set",
+      "centaur_set",
+      "onorix_set",
+      "agkuza_set",
+      "corvas_set",
+      "rathbone_set",
+      "wyrm_prime_set",
+      "glaive_prime_set",
+      "scindo_prime_set",
+      "akstiletto_prime_set",
+      "stropha_set",
+      "velox_set",
+      "stahlta_set",
+      "inaros_prime_set",
+      "karyst_prime_set",
+      "panthera_prime_set",
+      "phaedra_set",
+      "cernos_prime_set",
+      "valkyr_prime_set",
+      "imperator_vandal_set",
+      "akbolto_prime_set",
+      "limbo_prime_set",
+      "gorgon_wraith_set",
+      "xiphos_set",
+      "nikana_prime_set",
+      "cyngas_set",
+      "broken_war_set",
+      "kaszas_set",
+      "velocitus_set",
+      "fluctus_set",
+      "dual_decurion_set",
+      "spira_prime_set",
+      "sheev_set",
+      "nami_skyla_prime_set",
+      "kronen_prime_set",
+      "tiberon_prime_set",
+      "tipedo_prime_set",
+      "atlas_prime_set",
+      "tekko_prime_set",
+      "damaged_necramech_weapon_set",
+      "damaged_necramech_set",
+      "arum_spinosa_set",
+      "sporothrix_set",
+      "bonewidow_set",
+      "cortege_set",
+      "voidrig_set",
+      "cedo_set",
+      "chroma_prime_set",
+      "rubico_prime_set",
+      "banshee_prime_set",
+      "vauban_prime_set",
+      "burston_prime_set",
+      "loki_prime_set",
+      "nova_prime_set",
+      "nyx_prime_set",
+      "soma_prime_set",
+      "zephyr_prime_set",
+      "ivara_prime_set",
+      "akjagara_prime_set",
+      "mirage_prime_set",
+      "gram_prime_set",
+      "pyrana_prime_set",
+      "equinox_prime_set",
+      "guandao_prime_set",
+      "zakti_prime_set",
+      "spectra_vandal_set",
+      "bronco_prime_set",
+      "pathocyst_set",
+      "ash_prime_set",
+      "mesa_prime_set",
+      "nekros_prime_set",
+      "galatine_prime_set",
+      "corinth_prime_set",
+      "nezha_prime_set",
+      "morgha_set",
+      "pandero_prime_set",
+      "tenora_prime_set",
+      "octavia_prime_set",
+      "nautilus_set",
+      "carmine_penta_set",
+      "athodai_set",
+      "epitaph_set",
+      "volnus_prime_set",
+      "gara_prime_set",
+      "astilla_prime_set",
+      "meridian_armor_set",
+      "perrin_armor_set",
+      "suda_armor_set",
+      "solaris_armor_set",
+      "lokan_armor_set",
+      "ostron_armor_set",
+      "hexis_armor_set",
+      "red_veil_armor_set",
+      "ambassador_set",
+      "strun_prime_set",
+      "magnus_prime_set",
+      "nidus_prime_set",
+      "ghoulsaw_set",
+      "knell_prime_set",
+      "harrow_prime_set",
+      "scourge_prime_set",
+      "corvas_prime_set",
+      "nagantaka_prime_set",
+      "garuda_prime_set",
+      "aeolak_set",
+      "hespar_set",
+      "parallax_set",
+      "prisma_shade_set",
+      "dual_keres_prime_set",
+      "hystrix_prime_set",
+      "khora_prime_set",
+      "tatsu_prime_set",
+      "revenant_prime_set",
+      "phantasma_prime_set",
+      "perigale_set",
+      "sarofang_set",
+      "baruuk_prime_set",
+      "afuris_prime_set",
+      "cobra_and_crane_prime_set",
+      "steflos_set",
+      "corufell_set",
+      "hildryn_prime_set",
+      "larkspur_prime_set",
+      "shade_prime_set",
+      "cinta_set",
+      "rauta_set",
+      "gunsen_prime_set",
+      "wisp_prime_set",
+      "fulmin_prime_set",
+      "grendel_prime_set",
+      "masseter_prime_set",
+      "zylok_prime_set",
+      "mandonel_set",
+      "gauss_prime_set",
+      "akarius_prime_set",
+      "acceltra_prime_set",
+      "protea_prime_set",
+      "velox_prime_set",
+      "okina_prime_set",
+      "akmagnus_prime_set",
+      "sevagoth_prime_set",
+      "epitaph_prime_set",
+      "nautilus_prime_set",
+      "xaku_prime_set",
+      "trumna_prime_set",
+      "quassus_prime_set",
+      "reconifex_set",
+      "vesper_77_set",
+      "cedo_prime_set",
+      "dual_zoren_prime_set",
+      "lavos_prime_set"
+    ];
 
-      fetch(proxyUrl)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok: " + response.statusText);
-          }
-          return response.json();
-        })
-        .then(data => {
-          // AllOrigins returns the result in "contents" as a string.
-          const contents = data.contents;
-          // Parse the returned JSON string into an object.
-          const parsedData = JSON.parse(contents);
-          // Assuming the API returns an object with a payload containing an items array.
-          const items = parsedData.payload.items;
-          renderItems(items);
-        })
-        .catch(error => {
-          console.error("Error fetching items:", error);
-        });
+    // Base URL for the API
+    const baseUrl = "https://api.warframe.market/v1";
+
+    // Function to fetch orders for a given item
+    async function fetchOrdersForItem(urlName) {
+      const endpoint = `${baseUrl}/items/${urlName}/orders`;
+      try {
+        const response = await fetch(endpoint);
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        return await response.json();
+      } catch (error) {
+        return { error: error.message };
+      }
     }
 
-    // Render items in the table
-    function renderItems(items) {
-      const tableBody = document.getElementById("itemsTable").querySelector("tbody");
-      tableBody.innerHTML = ""; // Clear any existing rows
+    // Function to display the results for each item on the page
+    function displayResult(urlName, data) {
+      const content = document.getElementById("content");
 
-      items.forEach(item => {
-        const row = document.createElement("tr");
+      const container = document.createElement("div");
+      container.className = "item-result";
 
-        // Create cell for url_name
-        const urlNameCell = document.createElement("td");
-        urlNameCell.textContent = item.url_name;
-        row.appendChild(urlNameCell);
+      const title = document.createElement("h2");
+      title.textContent = urlName;
+      container.appendChild(title);
 
-        // Create cell for item_name
-        const itemNameCell = document.createElement("td");
-        itemNameCell.textContent = item.item_name;
-        row.appendChild(itemNameCell);
+      const pre = document.createElement("pre");
+      pre.textContent = JSON.stringify(data, null, 2);
+      // Highlight error text if exists
+      if (data.error) {
+        pre.classList.add("error");
+      }
+      container.appendChild(pre);
 
-        // Placeholder cell for a future calculated field
-        const calcFieldCell = document.createElement("td");
-        calcFieldCell.textContent = "TBD";  // Replace with your calculated value later
-        row.appendChild(calcFieldCell);
-
-        tableBody.appendChild(row);
-      });
+      content.appendChild(container);
     }
 
-    // When the page loads, fetch the latest items
-    window.onload = fetchItems;
+    // Loop through each item sequentially and display its orders data
+    async function loadAllOrders() {
+      // Clear initial loading message
+      document.getElementById("content").innerHTML = "";
+      for (let urlName of items) {
+        const data = await fetchOrdersForItem(urlName);
+        displayResult(urlName, data);
+      }
+    }
+
+    // Start fetching when the page loads
+    window.onload = loadAllOrders;
   </script>
 </body>
 </html>
