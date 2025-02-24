@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Warframe Market Items</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+  </style>
+</head>
+<body>
+  <h1>Warframe Market Items</h1>
+  <table id="itemsTable">
+    <thead>
+      <tr>
+        <th>url_name</th>
+        <th>item_name</th>
+        <th>Calculated Field</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Items will be dynamically inserted here -->
+    </tbody>
+  </table>
+
+  <script>
+    // Fetch and render items from the API
+    function fetchItems() {
+      // Using a proxy to bypass CORS restrictions.
+      // For public use on GitHub Pages, you may need to request temporary access at:
+      // https://cors-anywhere.herokuapp.com/corsdemo
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      const apiUrl = 'https://api.warframe.market/v1/items';
+      const fetchUrl = proxyUrl + apiUrl;
+
+      fetch(fetchUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok: " + response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Assuming the API returns an object with data.payload.items array
+          const items = data.payload.items;
+          renderItems(items);
+        })
+        .catch(error => {
+          console.error("Error fetching items:", error);
+        });
+    }
+
+    // Render items in the table with a placeholder for calculated fields
+    function renderItems(items) {
+      const tableBody = document.getElementById("itemsTable").querySelector("tbody");
+      tableBody.innerHTML = ""; // Clear existing rows
+
+      items.forEach(item => {
+        const row = document.createElement("tr");
+
+        // url_name column
+        const urlNameCell = document.createElement("td");
+        urlNameCell.textContent = item.url_name;
+        row.appendChild(urlNameCell);
+
+        // item_name column
+        const itemNameCell = document.createElement("td");
+        itemNameCell.textContent = item.item_name;
+        row.appendChild(itemNameCell);
+
+        // Placeholder for a calculated field
+        const calcFieldCell = document.createElement("td");
+        calcFieldCell.textContent = "TBD"; // Replace with your calculation later
+        row.appendChild(calcFieldCell);
+
+        tableBody.appendChild(row);
+      });
+    }
+
+    // When the page loads, fetch the latest items
+    window.onload = fetchItems;
+  </script>
+</body>
+</html>
