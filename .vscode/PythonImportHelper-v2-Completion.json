@@ -1,0 +1,161 @@
+[
+    {
+        "label": "requests",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "requests",
+        "description": "requests",
+        "detail": "requests",
+        "documentation": {}
+    },
+    {
+        "label": "tkinter",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "ttk",
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "isExtraImport": true,
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "ttk",
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "isExtraImport": true,
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "threading",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "threading",
+        "description": "threading",
+        "detail": "threading",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "setup",
+        "importPath": "distutils.core",
+        "description": "distutils.core",
+        "isExtraImport": true,
+        "detail": "distutils.core",
+        "documentation": {}
+    },
+    {
+        "label": "py2exe",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "py2exe",
+        "description": "py2exe",
+        "detail": "py2exe",
+        "documentation": {}
+    },
+    {
+        "label": "OrderFetcherApp",
+        "kind": 6,
+        "importPath": "build.lib.warframe_mr_calc",
+        "description": "build.lib.warframe_mr_calc",
+        "peekOfCode": "class OrderFetcherApp:\n    def __init__(self, master):\n        self.master = master\n        self.master.title(\"Warframe Market Order Fetcher\")\n        self.total_items = len(items_data)\n        self.current_index = 0\n        # Progress UI.\n        self.progress_frame = tk.Frame(self.master)\n        self.progress_frame.pack(pady=10)\n        self.progress_label = tk.Label(self.progress_frame, text=\"Starting order fetch...\")",
+        "detail": "build.lib.warframe_mr_calc",
+        "documentation": {}
+    },
+    {
+        "label": "find_key",
+        "kind": 2,
+        "importPath": "build.lib.warframe_mr_calc",
+        "description": "build.lib.warframe_mr_calc",
+        "peekOfCode": "def find_key(data, key):\n    \"\"\"Recursively search for a key in a nested dict/list structure.\"\"\"\n    if isinstance(data, dict):\n        if key in data:\n            return data[key]\n        for v in data.values():\n            result = find_key(v, key)\n            if result is not None:\n                return result\n    elif isinstance(data, list):",
+        "detail": "build.lib.warframe_mr_calc",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "build.lib.warframe_mr_calc",
+        "description": "build.lib.warframe_mr_calc",
+        "peekOfCode": "def main():\n    root = tk.Tk()\n    app = OrderFetcherApp(root)\n    root.after(100, app.start_fetching)\n    root.mainloop()\nif __name__ == \"__main__\":\n    main()",
+        "detail": "build.lib.warframe_mr_calc",
+        "documentation": {}
+    },
+    {
+        "label": "BASE_URL",
+        "kind": 5,
+        "importPath": "build.lib.warframe_mr_calc",
+        "description": "build.lib.warframe_mr_calc",
+        "peekOfCode": "BASE_URL = \"https://api.warframe.market/v1\"\n# Updated item list with name, type, and value.\nitems_data = [\n    {\"name\": \"frost_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"hydroid_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"saryn_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"helios_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"rhino_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"wukong_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"ember_prime_set\", \"type\": \"Warframe\", \"value\": 6000},",
+        "detail": "build.lib.warframe_mr_calc",
+        "documentation": {}
+    },
+    {
+        "label": "items_data",
+        "kind": 5,
+        "importPath": "build.lib.warframe_mr_calc",
+        "description": "build.lib.warframe_mr_calc",
+        "peekOfCode": "items_data = [\n    {\"name\": \"frost_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"hydroid_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"saryn_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"helios_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"rhino_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"wukong_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"ember_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"mag_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"oberon_prime_set\", \"type\": \"Warframe\", \"value\": 6000},",
+        "detail": "build.lib.warframe_mr_calc",
+        "documentation": {}
+    },
+    {
+        "label": "OrderFetcherApp",
+        "kind": 6,
+        "importPath": "warframe_mr_calc",
+        "description": "warframe_mr_calc",
+        "peekOfCode": "class OrderFetcherApp:\n    def __init__(self, master):\n        self.master = master\n        self.master.title(\"Warframe Market Order Fetcher\")\n        self.total_items = len(items_data)\n        self.current_index = 0\n        # Progress UI.\n        self.progress_frame = tk.Frame(self.master)\n        self.progress_frame.pack(pady=10)\n        self.progress_label = tk.Label(self.progress_frame, text=\"Starting order fetch...\")",
+        "detail": "warframe_mr_calc",
+        "documentation": {}
+    },
+    {
+        "label": "find_key",
+        "kind": 2,
+        "importPath": "warframe_mr_calc",
+        "description": "warframe_mr_calc",
+        "peekOfCode": "def find_key(data, key):\n    \"\"\"Recursively search for a key in a nested dict/list structure.\"\"\"\n    if isinstance(data, dict):\n        if key in data:\n            return data[key]\n        for v in data.values():\n            result = find_key(v, key)\n            if result is not None:\n                return result\n    elif isinstance(data, list):",
+        "detail": "warframe_mr_calc",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "warframe_mr_calc",
+        "description": "warframe_mr_calc",
+        "peekOfCode": "def main():\n    root = tk.Tk()\n    app = OrderFetcherApp(root)\n    root.after(100, app.start_fetching)\n    root.mainloop()\nif __name__ == \"__main__\":\n    main()",
+        "detail": "warframe_mr_calc",
+        "documentation": {}
+    },
+    {
+        "label": "BASE_URL",
+        "kind": 5,
+        "importPath": "warframe_mr_calc",
+        "description": "warframe_mr_calc",
+        "peekOfCode": "BASE_URL = \"https://api.warframe.market/v1\"\n# Updated item list with name, type, and value.\nitems_data = [\n    {\"name\": \"frost_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"hydroid_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"saryn_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"helios_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"rhino_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"wukong_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"ember_prime_set\", \"type\": \"Warframe\", \"value\": 6000},",
+        "detail": "warframe_mr_calc",
+        "documentation": {}
+    },
+    {
+        "label": "items_data",
+        "kind": 5,
+        "importPath": "warframe_mr_calc",
+        "description": "warframe_mr_calc",
+        "peekOfCode": "items_data = [\n    {\"name\": \"frost_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"hydroid_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"saryn_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"helios_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"rhino_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"wukong_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"ember_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"mag_prime_set\", \"type\": \"Warframe\", \"value\": 6000},\n    {\"name\": \"oberon_prime_set\", \"type\": \"Warframe\", \"value\": 6000},",
+        "detail": "warframe_mr_calc",
+        "documentation": {}
+    }
+]
