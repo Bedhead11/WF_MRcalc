@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import ttk
 import threading
 import time
-from datetime import datetime, timezone, timedelta
 
 # Base URL for the API
 BASE_URL = "https://api.warframe.market/v1"
@@ -163,6 +162,22 @@ items_data = [
     {"name": "pathocyst_set", "type": "Weapon", "value": 3000}
 ]
 
+def find_key(data, key):
+    """Recursively search for a key in a nested dict/list structure."""
+    if isinstance(data, dict):
+        if key in data:
+            return data[key]
+        for v in data.values():
+            result = find_key(v, key)
+            if result is not None:
+                return result
+    elif isinstance(data, list):
+        for item in data:
+            result = find_key(item, key)
+            if result is not None:
+                return result
+    return None
+
 class OrderFetcherApp:
     def __init__(self, master):
         self.master = master
@@ -170,7 +185,7 @@ class OrderFetcherApp:
         self.total_items = len(items_data)
         self.current_index = 0
 
-        # Progress UI at the top.
+        # Progress UI.
         self.progress_frame = tk.Frame(self.master)
         self.progress_frame.pack(pady=10)
         self.progress_label = tk.Label(self.progress_frame, text="Starting order fetch...")
@@ -179,7 +194,7 @@ class OrderFetcherApp:
         self.progress_bar.pack(pady=5)
         self.progress_bar["maximum"] = self.total_items
 
-        # Main table with columns: Item, Type, Value, Avg Price, Lowest Price, Highest Price, Value/AvgPrice.
+        # Main table.
         self.table_frame = tk.Frame(self.master)
         self.table_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
         columns = ("Item", "Type", "Value", "Avg Price", "Lowest Price", "Highest Price", "Value/AvgPrice")
@@ -195,13 +210,13 @@ class OrderFetcherApp:
         self.tree.column("Value/AvgPrice", width=120)
         self.tree.pack(fill=tk.BOTH, expand=True)
 
-        # Dictionary to track row IDs so we can update them later.
+        # Dictionary to track row IDs.
         self.row_ids = {}
         for item in items_data:
             row_id = self.tree.insert("", "end", values=(item["name"], item["type"], item["value"], "Pending", "Pending", "Pending", "Pending"))
             self.row_ids[item["name"]] = row_id
 
-        # Create a debug window to show full API responses.
+        # Create a debug window.
         self.create_debug_window()
 
     def create_debug_window(self):
@@ -224,30 +239,35 @@ class OrderFetcherApp:
         for item in items_data:
             name = item["name"]
             result = self.fetch_price(name)
-            # result is expected to be a tuple: (avg_price, lowest, highest)
             if isinstance(result, tuple):
-                avg_price, lowest, highest = result
+                avg_price, lowest, highest, incomplete = result
                 if isinstance(avg_price, (int, float)) and avg_price != 0:
                     ratio = round(item["value"] / avg_price, 2)
                 else:
                     ratio = "N/A"
+                # Append an asterisk if data is incomplete.
+                avg_disp = f"{avg_price}*" if incomplete else f"{avg_price}"
+                low_disp = f"{lowest}*" if incomplete else f"{lowest}"
+                high_disp = f"{highest}*" if incomplete else f"{highest}"
             else:
-                avg_price, lowest, highest, ratio = "N/A", "N/A", "N/A", "N/A"
-            # Update row with new values.
-            self.master.after(0, self.update_row, name, item["type"], item["value"], avg_price, lowest, highest, ratio)
+                avg_disp, low_disp, high_disp, ratio = "N/A", "N/A", "N/A", "N/A"
+            self.master.after(0, self.update_row, name, item["type"], item["value"], avg_disp, low_disp, high_disp, ratio)
             self.current_index += 1
             self.master.after(0, self.update_progress, name)
             time.sleep(0.2)
-        # After all items are fetched, sort the table by the "Value/AvgPrice" column in descending order.
         self.master.after(0, self.sort_table_by_ratio)
+        self.master.after(0, self.show_summary_window)
 
     def fetch_price(self, name):
         """
-        For a given item name, fetch orders from the API.
-        Filters out orders that lack a platinum value or whose user's last_seen is not within 24 hours.
-        Sorts valid orders by platinum (lowest first), then selects the orders ranked 4th–8th.
-        Computes and returns a tuple: (average platinum, lowest platinum, highest platinum)
-        from those orders. Also outputs debug info.
+        For a given item, fetch orders and recursively search for "platinum", "order_type", and "status".
+        Only consider orders where:
+          - platinum is present and convertible to float,
+          - order_type is "sell", and
+          - status is either "online" or "ingame".
+        Then, take the lowest up to 8 platinum values. If fewer than 8 orders are available but at least one exists,
+        compute the average and mark it as incomplete.
+        Returns a tuple: (avg_price, lowest, highest, incomplete_flag)
         """
         try:
             response = requests.get(f"{BASE_URL}/items/{name}/orders")
@@ -256,37 +276,34 @@ class OrderFetcherApp:
             if response.ok:
                 data = response.json()
                 orders = data.get("payload", {}).get("orders", [])
-                current_time = datetime.now(timezone.utc)
                 valid_orders = []
                 for order in orders:
-                    if order.get("platinum") is None:
-                        continue
-                    user = order.get("user", {})
-                    last_seen_str = user.get("last_seen")
-                    if not last_seen_str:
+                    platinum = find_key(order, "platinum")
+                    order_type = find_key(order, "order_type")
+                    user_status = find_key(order, "status")
+                    if platinum is None or order_type != "sell" or user_status not in {"online", "ingame"}:
                         continue
                     try:
-                        last_seen_dt = datetime.fromisoformat(last_seen_str)
+                        platinum_val = float(platinum)
                     except Exception:
                         continue
-                    if (current_time - last_seen_dt) <= timedelta(hours=24):
-                        valid_orders.append(order)
-                self.master.after(0, self.append_debug, f"For {name}: Found {len(valid_orders)} valid orders.")
-                if len(valid_orders) < 4:
-                    self.master.after(0, self.append_debug, f"For {name}: Not enough valid orders to compute price.")
+                    valid_orders.append({"platinum": platinum_val})
+                self.master.after(0, self.append_debug, f"For {name}: Found {len(valid_orders)} valid sell orders with status online/ingame.")
+                if len(valid_orders) < 1:
+                    self.master.after(0, self.append_debug, f"For {name}: No valid orders available.")
                     return "N/A"
                 sorted_orders = sorted(valid_orders, key=lambda o: o.get("platinum", float('inf')))
-                sorted_platinum = [order.get("platinum") for order in sorted_orders]
+                sorted_platinum = [o.get("platinum") for o in sorted_orders]
                 self.master.after(0, self.append_debug, f"For {name}: Sorted platinum values: {sorted_platinum}")
-                selected_orders = sorted_orders[3:8]
-                selected_platinum = [order.get("platinum") for order in selected_orders]
-                self.master.after(0, self.append_debug, f"For {name}: Using platinum values (4th-8th): {selected_platinum}")
-                if not selected_orders:
-                    return "N/A"
+                count = min(len(sorted_orders), 8)
+                selected_orders = sorted_orders[:count]
+                selected_platinum = [o.get("platinum") for o in selected_orders]
+                self.master.after(0, self.append_debug, f"For {name}: Using platinum values (lowest {count}): {selected_platinum}")
                 avg_price = sum(selected_platinum) / len(selected_platinum)
                 lowest = min(selected_platinum)
                 highest = max(selected_platinum)
-                return (round(avg_price, 2), lowest, highest)
+                incomplete = (len(sorted_orders) < 8)
+                return (round(avg_price, 2), lowest, highest, incomplete)
             else:
                 return f"Error {response.status_code}"
         except Exception as e:
@@ -303,10 +320,6 @@ class OrderFetcherApp:
         self.master.update_idletasks()
 
     def sort_table_by_ratio(self):
-        """
-        Sorts the table rows by the "Value/AvgPrice" column (last column) in descending order.
-        Rows with a non-numeric ratio (e.g. "N/A") are treated as -1.
-        """
         children = self.tree.get_children("")
         items_list = []
         for child in children:
@@ -316,11 +329,45 @@ class OrderFetcherApp:
             except:
                 ratio = -1.0
             items_list.append((child, ratio))
-        # Sort descending by ratio.
         sorted_items = sorted(items_list, key=lambda x: x[1], reverse=True)
         for index, (child, _) in enumerate(sorted_items):
             self.tree.move(child, "", index)
-        self.append_debug("Table sorted by Value/AvgPrice in descending order.")
+        self.append_debug("Main table sorted by Value/AvgPrice in descending order.")
+
+    def show_summary_window(self):
+        """
+        Computes a summary over all items with valid average prices.
+        It sums the item values and the numeric average platinum prices,
+        then computes the overall ratio = (total value) / (total platinum cost).
+        The summary window displays:
+           Total Value, Total Platinum, Overall Value/Plat Ratio.
+        """
+        total_value = 0
+        total_plat = 0
+        valid_count = 0
+        for child in self.tree.get_children(""):
+            row = self.tree.item(child)['values']
+            try:
+                # Remove any trailing asterisk and convert.
+                avg_price = float(str(row[3]).rstrip("*"))
+                value = float(row[2])
+                total_value += value
+                total_plat += avg_price
+                valid_count += 1
+            except:
+                continue
+        if valid_count == 0 or total_plat == 0:
+            overall_ratio = "N/A"
+        else:
+            overall_ratio = round(total_value / total_plat, 2)
+        summary_window = tk.Toplevel(self.master)
+        summary_window.title("Overall Summary")
+        frame = tk.Frame(summary_window)
+        frame.pack(padx=10, pady=10)
+        tk.Label(frame, text=f"Total Value: {total_value}").grid(row=0, column=0, padx=5, pady=5)
+        tk.Label(frame, text=f"Total Platinum (Avg Price Sum): {total_plat}").grid(row=1, column=0, padx=5, pady=5)
+        tk.Label(frame, text=f"Overall Value/Plat Ratio: {overall_ratio}").grid(row=2, column=0, padx=5, pady=5)
+        self.append_debug("Summary window displayed.")
 
 def main():
     root = tk.Tk()
